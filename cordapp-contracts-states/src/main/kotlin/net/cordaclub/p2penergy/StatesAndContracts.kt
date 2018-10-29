@@ -7,9 +7,7 @@ import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
 import net.corda.core.transactions.LedgerTransaction
 
-enum class EventType { DEMAND_ENERGY_UNIT, SURPLUS_ENERGY_UNIT }
-
-object pricing {
+object Pricing {
     val p2pPrice = 9 // this is 9p
     val utilitySell = 14
     val utilityBuy = 14
@@ -25,7 +23,6 @@ object pricing {
  */
 class EnergyEventState(
         val household: Party,
-        val eventType: EventType,
         val interval: Int,  // 1.1.2019: 00:00-29 = 1, 00:30-01:00 = 2
         val readingStart: Int, // in Watts
         val readingEnd: Int, // in Watts
