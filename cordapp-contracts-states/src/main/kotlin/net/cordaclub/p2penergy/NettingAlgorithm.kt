@@ -6,7 +6,8 @@ import net.corda.core.identity.Party
 data class NettingResult(val amountToPay: Int? = null, val amountToReceive: Int? = null)
 
 // pricing
-//receives a map of PartyName-readingValue
+// receives a map of PartyName-readingValue
+// The readingValue is positive if the party produced, and negative if he consumed
 fun netting(readings: Map<String, Int>, utilityCompany: String): Map<String, NettingResult> {
 //TODO
 // 1) sum up all readings (reading =end-start)
