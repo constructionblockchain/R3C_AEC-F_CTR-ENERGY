@@ -29,7 +29,6 @@ IN PROGRESS:
 
 - Create state for the energy token
 
-
 DONE
 - basic web setup 
 - simulation timer

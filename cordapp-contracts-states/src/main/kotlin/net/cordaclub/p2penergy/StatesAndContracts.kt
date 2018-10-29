@@ -9,19 +9,30 @@ import net.corda.core.transactions.LedgerTransaction
 
 enum class EventType { DEMAND_ENERGY_UNIT, SURPLUS_ENERGY_UNIT }
 
-data class Reading(val value:Int){}
+object pricing {
+    val p2pPrice = 9 // this is 9p
+    val utilitySell = 14
+    val utilityBuy = 14
 
+}
+
+/**
+ * This is the main fact that lives on the ledger.
+ * This state will be published every 30 minutes by the smart meter, which is tamper proof.
+ *
+ * The actual energy is: readingEnd - readingStart
+ *
+ */
 class EnergyEventState(
-        val houseHold: Party,
+        val household: Party,
         val eventType: EventType,
         val interval: Int,  // 1.1.2019: 00:00-29 = 1, 00:30-01:00 = 2
-
-        val reading: Reading,
-
-        val traded: Boolean
+        val readingStart: Int, // in Watts
+        val readingEnd: Int, // in Watts
+        val tradedStatus: Boolean
 ) : ContractState {
     override val participants: List<AbstractParty>
-        get() = listOf(houseHold)
+        get() = listOf(household)
 }
 
 class EnergyEventContract : Contract {
@@ -42,5 +53,5 @@ class EnergyEventContract : Contract {
 }
 
 
-class ReadingReconciliationState(){} //stuff
+//class ReadingReconciliationState(){} //stuff
 
