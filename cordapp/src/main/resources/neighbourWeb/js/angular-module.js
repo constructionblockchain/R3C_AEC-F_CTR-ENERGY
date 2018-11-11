@@ -31,8 +31,20 @@ app.controller('DemoAppController', function($http, $location, $uibModal) {
 
     // This Node
     $http.get(apiBaseURL + "me").then((response) => {
+        console.log(response);
         demoApp.thisNode = response.data.me;
     });
+
+    $http.get(apiBaseURL + "balance").then((response) => {
+        console.log(response);
+        demoApp.balance = response.data.balance;
+    });
+
+    $http.get(apiBaseURL + "energy").then((response) =>{
+            console.log(response);
+            demoApp.energy = Object.keys(response.data).map((key) => response.data[key].state.data)
+        }
+    );
 
 });
 

@@ -1,32 +1,71 @@
 package net.cordaclub.p2penergy
 
 import net.corda.core.identity.CordaX500Name
+import net.corda.core.messaging.startFlow
+import net.corda.core.utilities.OpaqueBytes
 import net.corda.core.utilities.getOrThrow
+import net.corda.finance.POUNDS
+import net.corda.finance.flows.CashIssueAndPaymentFlow
 import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.driver
 import net.corda.testing.node.User
+import java.lang.Thread.sleep
+import java.util.*
 
-/**
- * This file is exclusively for being able to run your nodes through an IDE (as opposed to using deployNodes)
- * Do not use in a production environment.
- *
- * To debug your CorDapp:
- *
- * 1. Run the "Run Template CorDapp" run configuration.
- * 2. Wait for all the nodes to start.
- * 3. Note the debug ports for each node, which should be output to the console. The "Debug CorDapp" configuration runs
- *    with port 5007, which should be "PartyA". In any case, double-check the console output to be sure.
- * 4. Set your breakpoints in your CorDapp code.
- * 5. Run the "Debug CorDapp" remote debug run configuration.
- */
 fun main(args: Array<String>) {
-    val user = User("user1", "test", permissions = setOf("ALL"))
-    driver(DriverParameters(isDebug = true, waitForAllNodesToFinish = true)) {
-        val (partyA, partyB) = listOf(
-                startNode(providedName = CordaX500Name("PartyA", "London", "GB"), rpcUsers = listOf(user)),
-                startNode(providedName = CordaX500Name("PartyB", "New York", "US"), rpcUsers = listOf(user))).map { it.getOrThrow() }
+    val issuedMoney = 100.POUNDS
+    val issuerBankPartyRef = OpaqueBytes.of(1)
 
+    val user = User("user1", "test", permissions = setOf("ALL"))
+    driver(DriverParameters(
+            extraCordappPackagesToScan = listOf("net.cordaclub.p2penergy", "net.corda.finance.contracts.asset"),
+            waitForAllNodesToFinish = true,
+            startNodesInProcess = false,
+            isDebug = false
+    )) {
+        val partyA = startNode(providedName = CordaX500Name("John's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
+        val partyB = startNode(providedName = CordaX500Name("Mary's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
+        val partyC = startNode(providedName = CordaX500Name("Jane's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
+//        val partyD = startNode(providedName = CordaX500Name("Jack's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
+//        val partyE = startNode(providedName = CordaX500Name("Alice's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
+        val bank = startNode(providedName = CordaX500Name("Bank", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
+        val utility = startNode(providedName = CordaX500Name("Utility", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
         startWebserver(partyA)
         startWebserver(partyB)
+        startWebserver(partyC)
+        startWebserver(utility)
+
+//        val allNeighbours = listOf(partyA, partyB, partyC, partyD, partyE)
+        val allNeighbours = listOf(partyA, partyB, partyC)
+        val notaryLegalIdentity = notaryHandles.first().identity
+
+        // Issue Cash to everyone
+        for (nodeHandle in (allNeighbours + utility)) {
+            bank.rpc.startFlow(::CashIssueAndPaymentFlow,
+                    CashIssueAndPaymentFlow.IssueAndPaymentRequest(
+                            issuedMoney, issuerBankPartyRef, nodeHandle.nodeInfo.legalIdentities.first(), notaryLegalIdentity, false)
+            ).returnValue.getOrThrow()
+        }
+
+        var energyReadings = allNeighbours.map { it to 0 }
+
+        for (interval in (1..100)) {
+            println("------------")
+            println("Iteration: $interval. Readings: ${energyReadings.map { it.second }}")
+            energyReadings = energyReadings.map { (party, reading) ->
+                val consumption = generateRandomConsumption(-50, 50)
+                val finalReading = reading + consumption
+                party.rpc.startFlow(EnergyFlows::RegisterEnergyConsumption, interval, reading, finalReading).returnValue.getOrThrow()
+                party to finalReading
+            }
+
+            val tx = partyA.rpc.startFlow(EnergyFlows::EnergyNettingFlow, interval, allNeighbours.drop(1).map { it.nodeInfo.legalIdentities.first() }, utility.nodeInfo.legalIdentities.first(), bank.nodeInfo.legalIdentities.first()).returnValue.getOrThrow()
+            println(tx.coreTransaction)
+//            sleep(1000)
+        }
+
     }
 }
+
+val r = Random()
+fun generateRandomConsumption(min: Int, max: Int): Int = r.nextInt(max - min + 1) + min

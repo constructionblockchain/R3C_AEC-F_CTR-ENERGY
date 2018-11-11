@@ -17,10 +17,51 @@
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a class="navbar-brand" href="#">{{demoApp.thisNode}}</a>
+            <a class="navbar-brand" href="#">{{demoApp.thisNode}}. Balance: {{demoApp.balance}}</a>
         </div>
     </div>
 </nav>
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div ng-show="!demoApp.energy.length" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Energy</h3>
+            </div>
+            <div class="panel-body">There are no recorded Energy readings.</div>
+        </div>
+        <div ng-show="demoApp.energy.length" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Energy</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table text-center">
+                    <thead>
+                    <tr>
+                        <th class="text-center">Interval</th>
+                        <th class="text-center">Reading start</th>
+                        <th class="text-center">Reading end</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Amount Payed</th>
+                        <th class="text-center">Amount Received</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="state in demoApp.energy">
+                        <td class="vert-align">{{state.interval}}</td>
+                        <td class="vert-align">{{state.readingStart}} kWh</td>
+                        <td class="vert-align">{{state.readingEnd}} kWh</td>
+                        <td class="vert-align">{{state.tradedStatus}}</td>
+                        <td class="vert-align">{{state.payed}}</td>
+                        <td class="vert-align">{{state.received}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-1"></div>
+</div>
 <script type="text/ng-template" id="messageContent.html">
     <div class="modal-body" id="modal-body">
         {{ modalInstanceTwo.message }}

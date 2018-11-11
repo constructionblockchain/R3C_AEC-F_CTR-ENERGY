@@ -4,10 +4,8 @@ TODO:
 
 External program:
 
-    1) issue cash to everyone
     2) every x seconds on each node trigger generation of random tokens on each neighbour 
  
-
 Web: 
  - display energy state list and cash balance for each party
 
@@ -32,3 +30,4 @@ IN PROGRESS:
 DONE
 - basic web setup 
 - simulation timer
+- issue cash to everyone

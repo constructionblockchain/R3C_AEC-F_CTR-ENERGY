@@ -2,6 +2,7 @@ package net.cordaclub.p2penergy
 
 import net.corda.client.rpc.CordaRPCClient
 import net.corda.core.contracts.StateAndRef
+import net.corda.core.messaging.startFlow
 import net.corda.core.utilities.NetworkHostAndPort.Companion.parse
 import net.corda.core.utilities.loggerFor
 import org.slf4j.Logger
@@ -25,6 +26,8 @@ private class EnergyClient {
 
         // Can be amended in the com.p2penergy.MainKt file.
         val proxy = client.start("user1", "test").proxy
+
+        proxy.startFlow(EnergyFlows::RegisterEnergyConsumption, 1, 10, 20)
 
         // Grab all existing EnergyEventStates and all future EnergyEventStates.
         val (snapshot, updates) = proxy.vaultTrack(EnergyEventState::class.java)
