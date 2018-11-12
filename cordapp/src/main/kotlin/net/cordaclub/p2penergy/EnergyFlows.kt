@@ -65,7 +65,7 @@ object EnergyFlows {
                 neighbourState.firstOrNull()
             }
 
-            logger.warn("ENERGY: " + energyStates.map { it?.state?.data?.household } + " = " + energyStates.map { it?.state?.data?.readingEnd })
+            logger.warn("ENERGY: " + energyStates.map { it?.state?.data?.party } + " = " + energyStates.map { it?.state?.data?.readingEnd })
 
             // Now we have all states from everyone we run the netting function
             val nettingResults = netStates(
@@ -114,8 +114,8 @@ object EnergyFlows {
             (energyStates + state).filter { it != null }.forEach { energyState ->
                 builder = builder.addOutputState(energyState!!.state.data.copy(
                         tradedStatus = EnergyStateStatus.TRADED,
-                        payed = nettingResults[energyState.state.data.household]?.amountToPay,
-                        received = nettingResults[energyState.state.data.household]?.amountToReceive),
+                        payed = nettingResults[energyState.state.data.party]?.amountToPay,
+                        received = nettingResults[energyState.state.data.party]?.amountToReceive),
                         EnergyEventContract::class.java.name)
             }
 
@@ -179,6 +179,8 @@ object EnergyFlows {
             // sign and send back
             val tx = subFlow(object : SignTransactionFlow(session) {
                 override fun checkTransaction(stx: SignedTransaction) = requireThat {
+                    // TODO - run netting algorithm and check that the transaction corresponds to that.
+                    // TODO - check that current node receives what he's owed.
                 }
             })
 

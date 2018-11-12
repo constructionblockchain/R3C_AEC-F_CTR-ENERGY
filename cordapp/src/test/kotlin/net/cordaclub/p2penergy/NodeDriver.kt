@@ -26,8 +26,8 @@ fun main(args: Array<String>) {
         val partyA = startNode(providedName = CordaX500Name("John's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
         val partyB = startNode(providedName = CordaX500Name("Mary's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
         val partyC = startNode(providedName = CordaX500Name("Jane's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
-//        val partyD = startNode(providedName = CordaX500Name("Jack's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
-//        val partyE = startNode(providedName = CordaX500Name("Alice's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
+        val partyD = startNode(providedName = CordaX500Name("Jack's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
+        val partyE = startNode(providedName = CordaX500Name("Alice's House", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
         val bank = startNode(providedName = CordaX500Name("Bank", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
         val utility = startNode(providedName = CordaX500Name("Utility", "London", "GB"), rpcUsers = listOf(user)).getOrThrow()
         startWebserver(partyA)
@@ -35,8 +35,8 @@ fun main(args: Array<String>) {
         startWebserver(partyC)
         startWebserver(utility)
 
-//        val allNeighbours = listOf(partyA, partyB, partyC, partyD, partyE)
-        val allNeighbours = listOf(partyA, partyB, partyC)
+        val allNeighbours = listOf(partyA, partyB, partyC, partyD, partyE)
+//        val allNeighbours = listOf(partyA, partyB, partyC)
         val notaryLegalIdentity = notaryHandles.first().identity
 
         // Issue Cash to everyone
