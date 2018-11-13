@@ -33,10 +33,11 @@ fun main(args: Array<String>) {
         startWebserver(partyA)
         startWebserver(partyB)
         startWebserver(partyC)
+        startWebserver(partyD)
+        startWebserver(partyE)
         startWebserver(utility)
 
         val allNeighbours = listOf(partyA, partyB, partyC, partyD, partyE)
-//        val allNeighbours = listOf(partyA, partyB, partyC)
         val notaryLegalIdentity = notaryHandles.first().identity
 
         // Issue Cash to everyone
@@ -51,17 +52,17 @@ fun main(args: Array<String>) {
 
         for (interval in (1..100)) {
             println("------------")
-            println("Iteration: $interval. Readings: ${energyReadings.map { it.second }}")
             energyReadings = energyReadings.map { (party, reading) ->
                 val consumption = generateRandomConsumption(-50, 50)
                 val finalReading = reading + consumption
                 party.rpc.startFlow(EnergyFlows::RegisterEnergyConsumption, interval, reading, finalReading).returnValue.getOrThrow()
                 party to finalReading
             }
+            println("Iteration: $interval. Readings: ${energyReadings.map { it.second }}")
 
             val tx = partyA.rpc.startFlow(EnergyFlows::EnergyNettingFlow, interval, allNeighbours.drop(1).map { it.nodeInfo.legalIdentities.first() }, utility.nodeInfo.legalIdentities.first(), bank.nodeInfo.legalIdentities.first()).returnValue.getOrThrow()
             println(tx.coreTransaction)
-//            sleep(1000)
+            sleep(2000)
         }
 
     }
